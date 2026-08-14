@@ -44,6 +44,23 @@ This is a static file — any static host works:
 
 Single-file HTML/CSS/JS, no build tools or dependencies beyond the Firebase SDK (loaded via CDN, only used if sync is configured).
 
+Moving Off Test-Mode Firestore Rules
+
+Test mode rules expire after 30 days. To keep the app working indefinitely without breaking sync (the app has no login, so full "production mode" default rules will deny everything), replace your Firestore rules with:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /ledger-sync/{syncCode} {
+      allow read, write: if true;
+    }
+  }
+}
+
+Go to Firebase Console → Firestore Database → Rules tab → paste this in → Publish.
+
+⚠️ This removes the expiration date but does not add real security — it's still open to anyone with your API Key, Project ID, and Sync Code, same as test mode. True security would require adding Firebase Authentication and rules based on request.auth.
+
 ## Notes
 
 - Firestore's free tier comfortably supports years of typical personal use before any storage limits come into play.
